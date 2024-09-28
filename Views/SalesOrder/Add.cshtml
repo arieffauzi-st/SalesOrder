@@ -1,0 +1,197 @@
+@model SalesOrder.DTOs.OrderDto
+@{
+    ViewData["Title"] = "Add New - Sales Order";
+    Layout = "_Layout";
+}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New - Sales Order</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Add New - Sales Order</h1>
+        <div class="card">
+            <div class="card-header">
+                Sales Order Information
+            </div>
+            <div class="card-body">
+                <form asp-action="Add" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="OrderNo">Sales Order Number</label>
+                                <input asp-for="OrderNo" class="form-control" required>
+                                <span asp-validation-for="OrderNo" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="OrderDate">Order Date</label>
+                                <input asp-for="OrderDate" class="form-control" type="date" required>
+                                <span asp-validation-for="OrderDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ComCustomerId">Customer</label>
+                                <select asp-for="ComCustomerId" class="form-control" asp-items="@(new SelectList(Model.Customers, "ComCustomerId", "CustomerName"))" required>
+                                    <option value="">Select One</option>
+                                </select>
+                                <span asp-validation-for="ComCustomerId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Address">Address</label>
+                                <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Address" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            Detail Item Information
+                        </div>
+                        <div class="card-body">
+                            <button type="button" id="addItemBtn" class="btn btn-primary mb-3">Add Item</button>
+                            <table id="itemTable" class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Action</th>
+                                        <th>Item Name</th>
+                                        <th>Qty</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>Total Item: <span id="totalItem">0</span></p>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <p>Total Amount: <span id="totalAmount">0</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a asp-action="Index" class="btn btn-secondary">Close</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var items = [];
+
+            function renderItems() {
+                var tbody = $('#itemTable tbody');
+                tbody.empty();
+                items.forEach(function(item, index) {
+                    tbody.append(`
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary edit-item" data-index="${index}">Edit</button>
+                                <button type="button" class="btn btn-sm btn-danger delete-item" data-index="${index}">Delete</button>
+                            </td>
+                            <td>${item.itemName}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.price.toFixed(2)}</td>
+                            <td>${(item.quantity * item.price).toFixed(2)}</td>
+                        </tr>
+                    `);
+                });
+                updateTotals();
+            }
+
+            function updateTotals() {
+                var totalItem = items.reduce((sum, item) => sum + item.quantity, 0);
+                var totalAmount = items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+                $('#totalItem').text(totalItem);
+                $('#totalAmount').text(totalAmount.toFixed(2));
+            }
+
+            $('#addItemBtn').click(function() {
+                items.push({ itemName: '', quantity: 0, price: 0 });
+                renderItems();
+                editItem(items.length - 1);
+            });
+
+            $(document).on('click', '.edit-item', function() {
+                var index = $(this).data('index');
+                editItem(index);
+            });
+
+            $(document).on('click', '.delete-item', function() {
+                var index = $(this).data('index');
+                items.splice(index, 1);
+                renderItems();
+            });
+
+            function editItem(index) {
+                var item = items[index];
+                var row = $('#itemTable tbody tr').eq(index);
+                row.html(`
+                    <td>${index + 1}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-success save-item" data-index="${index}">Save</button>
+                        <button type="button" class="btn btn-sm btn-secondary cancel-edit" data-index="${index}">Cancel</button>
+                    </td>
+                    <td><input type="text" class="form-control" value="${item.itemName}"></td>
+                    <td><input type="number" class="form-control" value="${item.quantity}"></td>
+                    <td><input type="number" class="form-control" value="${item.price}"></td>
+                    <td>${(item.quantity * item.price).toFixed(2)}</td>
+                `);
+            }
+
+            $(document).on('click', '.save-item', function() {
+                var index = $(this).data('index');
+                var row = $('#itemTable tbody tr').eq(index);
+                items[index] = {
+                    itemName: row.find('td:eq(2) input').val(),
+                    quantity: parseInt(row.find('td:eq(3) input').val()),
+                    price: parseFloat(row.find('td:eq(4) input').val())
+                };
+                renderItems();
+            });
+
+            $(document).on('click', '.cancel-edit', function() {
+                renderItems();
+            });
+
+            $('form').submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+                
+                // Tambahkan items ke formData
+                formData.append('Items', JSON.stringify(items));
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function() {
+                        window.location.href = '@Url.Action("Index", "SalesOrder")';
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                        alert('An error occurred while saving the order. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
