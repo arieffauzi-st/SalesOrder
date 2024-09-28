@@ -3,18 +3,24 @@
 <nav aria-label="Page navigation">
     <ul class="pagination">
         <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
-            <a class="page-link" href="@Url.Action(ViewContext.RouteData.Values["action"].ToString(), new { pageNumber = Model.PageIndex - 1, currentFilter = ViewData["CurrentFilter"] })" aria-label="Previous">
+            <a class="page-link bg-soft-blue text-dark" asp-action="@ViewContext.RouteData.Values["action"].ToString()" asp-route-pageNumber="@(Model.PageIndex - 1)" asp-route-keyword="@ViewBag.Keyword" asp-route-orderDate="@ViewBag.OrderDate" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
             </a>
         </li>
-        @for (int i = 1; i <= Model.TotalPages; i++)
+        @{
+            const int totalPagesToShow = 5;
+            var startPage = Math.Max(1, Model.PageIndex - 2);
+            var endPage = Math.Min(Model.TotalPages, startPage + totalPagesToShow - 1);
+            startPage = Math.Max(1, endPage - totalPagesToShow + 1);
+        }
+        @for (int i = startPage; i <= endPage; i++)
         {
             <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                <a class="page-link" href="@Url.Action(ViewContext.RouteData.Values["action"].ToString(), new { pageNumber = i, currentFilter = ViewData["CurrentFilter"] })">@i</a>
+                <a class="page-link @(i == Model.PageIndex ? "bg-soft-blue text-dark" : "text-dark")" asp-action="@ViewContext.RouteData.Values["action"].ToString()" asp-route-pageNumber="@i" asp-route-keyword="@ViewBag.Keyword" asp-route-orderDate="@ViewBag.OrderDate">@i</a>
             </li>
         }
         <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
-            <a class="page-link" href="@Url.Action(ViewContext.RouteData.Values["action"].ToString(), new { pageNumber = Model.PageIndex + 1, currentFilter = ViewData["CurrentFilter"] })" aria-label="Next">
+            <a class="page-link bg-soft-blue text-dark" asp-action="@ViewContext.RouteData.Values["action"].ToString()" asp-route-pageNumber="@(Model.PageIndex + 1)" asp-route-keyword="@ViewBag.Keyword" asp-route-orderDate="@ViewBag.OrderDate" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
             </a>
         </li>

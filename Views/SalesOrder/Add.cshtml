@@ -5,10 +5,12 @@
 }
 
 <div class="container-fluid">
-    <h1 class="mb-4">ADD NEW - SALES ORDER</h1>
+    <div class="card-header bg-soft-blue text-dark">
+        <h3 class="mb-0 font-weight-bold">Add New - Sales Order</h3>
+    </div>
     <form asp-action="Add" method="post">
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-soft-blue text-dark text-center">
                 <h5 class="mb-0">Sales Order Information</h5>
             </div>
             <div class="card-body bg-light">
@@ -44,14 +46,14 @@
         </div>
 
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-soft-blue text-dark">
                 <h5 class="mb-0">Detail Item Information</h5>
             </div>
             <div class="card-body">
-                <button type="button" id="addItemBtn" class="btn btn-danger mb-3">Add Item</button>
+                <button type="button" id="addItemBtn" class="btn btn-soft-blue mb-3">Add Item</button>
                 <span class="text-warning ml-2">Eg: Item</span>
                 <table id="itemTable" class="table table-striped">
-                    <thead class="bg-primary text-white">
+                    <thead class="bg-soft-blue text-dark">
                         <tr>
                             <th>No</th>
                             <th>Action</th>
@@ -81,8 +83,8 @@
         </div>
 
         <div class="mt-3">
-            <button type="submit" class="btn btn-danger">Save</button>
-            <a asp-action="Index" class="btn btn-secondary">Close</a>
+            <button type="submit" class="btn btn-soft-blue">Save</button>
+            <a asp-action="Index" class="btn btn-light border">Close</a>
         </div>
     </form>
 </div>
@@ -107,8 +109,12 @@
                         <tr>
                             <td>${startIndex + index + 1}</td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-primary edit-item" data-index="${startIndex + index}">Edit</button>
-                                <button type="button" class="btn btn-sm btn-danger delete-item" data-index="${startIndex + index}">Delete</button>
+                                <button type="button" class="btn btn-sm btn-primary edit-item" data-index="${startIndex + index}">
+                                    <i class="bi bi-pencil"></i>  Edit
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger delete-item" data-index="${startIndex + index}">
+                                    <i class="bi bi-trash"></i>  Delete
+                                </button>
                             </td>
                             <td>${item.itemName}</td>
                             <td>${item.quantity}</td>
@@ -173,8 +179,12 @@
                 row.html(`
                     <td>${index + 1}</td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-success save-item" data-index="${index}">Save</button>
-                        <button type="button" class="btn btn-sm btn-secondary cancel-edit" data-index="${index}">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-soft-blue save-item" data-index="${index}">
+                            <i class="fas fa-save"></i>  Save
+                        </button>
+                        <button type="button" class="btn btn-sm btn-light border cancel-edit" data-index="${index}">
+                            <i class="fas fa-times"></i>  Cancel
+                        </button>
                     </td>
                     <td><input type="text" class="form-control" value="${item.itemName}"></td>
                     <td><input type="number" class="form-control" value="${item.quantity}"></td>

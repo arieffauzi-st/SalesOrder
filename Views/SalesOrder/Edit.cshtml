@@ -4,84 +4,86 @@
     Layout = "_Layout";
 }
 
-<h1>Edit - Sales Order</h1>
-
-<div class="card">
-    <div class="card-header">
-        Sales Order Information
+<div class="container-fluid">
+    <div class="card-header bg-soft-blue text-dark">
+        <h3 class="mb-0 font-weight-bold">Edit - Sales Order</h3>
     </div>
-    <div class="card-body">
-        <form asp-action="Edit" method="post">
-            <input type="hidden" asp-for="SoOrderId" />
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="OrderNo">Sales Order Number</label>
-                        <input asp-for="OrderNo" class="form-control" readonly>
-                        <span asp-validation-for="OrderNo" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="OrderDate">Order Date</label>
-                        <input asp-for="OrderDate" class="form-control" type="date">
-                        <span asp-validation-for="OrderDate" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label asp-for="ComCustomerId">Customer</label>
-                        <select asp-for="ComCustomerId" class="form-control" asp-items="@(new SelectList(Model.Customers, "ComCustomerId", "CustomerName"))">
-                            <option value="">-- Select Customer --</option>
-                        </select>
-                        <span asp-validation-for="ComCustomerId" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Address">Address</label>
-                        <textarea asp-for="Address" class="form-control" rows="3"></textarea>
-                        <span asp-validation-for="Address" class="text-danger"></span>
-                    </div>
-                </div>
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="SoOrderId" />
+        <div class="card mb-4">
+            <div class="card-header bg-soft-blue text-dark text-center">
+                <h5 class="mb-0">Sales Order Information</h5>
             </div>
-
-            <div class="card mt-4">
-                <div class="card-header">
-                    Detail Item Information
-                </div>
-                <div class="card-body">
-                    <button type="button" id="addItemBtn" class="btn btn-primary mb-3">Add Item</button>
-                    <table id="itemTable" class="table">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Action</th>
-                                <th>Item Name</th>
-                                <th>Qty</th>
-                                <th>Price</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                    <div id="itemPagination"></div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p>Total Item: <span id="totalItem">0</span></p>
+            <div class="card-body bg-light">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="OrderNo">Sales Order Number</label>
+                            <input asp-for="OrderNo" class="form-control" readonly>
+                            <span asp-validation-for="OrderNo" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 text-right">
-                            <p>Total Amount: <span id="totalAmount">0</span></p>
+                        <div class="form-group">
+                            <label asp-for="OrderDate">Order Date</label>
+                            <input asp-for="OrderDate" class="form-control" type="date">
+                            <span asp-validation-for="OrderDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ComCustomerId">Customer</label>
+                            <select asp-for="ComCustomerId" class="form-control" asp-items="@(new SelectList(Model.Customers, "ComCustomerId", "CustomerName"))">
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                            <span asp-validation-for="ComCustomerId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Address">Address</label>
+                            <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="mt-3">
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a asp-action="Index" class="btn btn-secondary">Close</a>
+        <div class="card">
+            <div class="card-header bg-soft-blue text-dark">
+                <h5 class="mb-0">Detail Item Information</h5>
             </div>
-        </form>
-    </div>
+            <div class="card-body">
+                <button type="button" id="addItemBtn" class="btn btn-soft-blue mb-3">Add Item</button>
+                <span class="text-warning ml-2">Eg: Item</span>
+                <table id="itemTable" class="table table-striped">
+                    <thead class="bg-soft-blue text-dark">
+                        <tr>
+                            <th>No</th>
+                            <th>Action</th>
+                            <th>Item Name</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div id="itemPagination"></div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p>Total Item: <span id="totalItem">0</span></p>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <p>Total Amount: <span id="totalAmount">0</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-soft-blue">Save Changes</button>
+            <a asp-action="Index" class="btn btn-light border">Cancel</a>
+        </div>
+    </form>
 </div>
-
-<h2></h2>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
@@ -103,8 +105,12 @@
                       <tr>
                           <td>${startIndex + index + 1}</td>
                           <td>
-                              <button type="button" class="btn btn-sm btn-primary edit-item" data-index="${startIndex + index}">Edit</button>
-                              <button type="button" class="btn btn-sm btn-danger delete-item" data-index="${startIndex + index}">Delete</button>
+                              <button type="button" class="btn btn-sm btn-soft-blue edit-item" data-index="${startIndex + index}">
+                                  <i class="fas fa-edit"></i> Edit
+                              </button>
+                              <button type="button" class="btn btn-sm btn-soft-red delete-item" data-index="${startIndex + index}">
+                                  <i class="fas fa-trash"></i> Delete
+                              </button>
                           </td>
                           <td>${item.itemName}</td>
                           <td>${item.quantity}</td>
@@ -164,8 +170,12 @@
                 row.html(`
                   <td>${index + 1}</td>
                   <td>
-                      <button type="button" class="btn btn-sm btn-success save-item" data-index="${index}">Save</button>
-                      <button type="button" class="btn btn-sm btn-secondary cancel-edit" data-index="${index}">Cancel</button>
+                      <button type="button" class="btn btn-sm btn-soft-blue save-item" data-index="${index}">
+                          <i class="fas fa-save"></i> Save
+                      </button>
+                      <button type="button" class="btn btn-sm btn-light border cancel-edit" data-index="${index}">
+                          <i class="fas fa-times"></i> Cancel
+                      </button>
                   </td>
                   <td><input type="text" class="form-control" value="${item.itemName}"></td>
                   <td><input type="number" class="form-control" value="${item.quantity}"></td>

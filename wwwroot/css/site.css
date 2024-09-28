@@ -20,3 +20,29 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.bg-soft-blue {
+    background-color: #e6f2ff;
+}
+
+.btn-soft-blue {
+    background-color: #e6f2ff;
+    color: #0056b3;
+    border: 1px solid #b8daff;
+}
+
+.btn-soft-blue:hover {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.btn-soft-red {
+    background-color: #ffe6e6;
+    color: #b30000;
+    border: 1px solid #ffb8b8;
+}
+
+.btn-soft-red:hover {
+    background-color: #ffcccc;
+    color: #800000;
+}
