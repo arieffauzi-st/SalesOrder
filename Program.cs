@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SalesOrder.Data;
 using SalesOrder.Helpers;
 using SalesOrder.Interfaces;
+using SalesOrder.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

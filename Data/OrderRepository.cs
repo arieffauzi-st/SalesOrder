@@ -57,7 +57,7 @@ public class OrderRepository : IOrderRepository
         }
 
         _context.SoOrders.Add(order);
-        await _context.SaveChangesAsync(); // Generates SoOrderId
+        await _context.SaveChangesAsync(); 
 
         if (orderDto.Items != null && orderDto.Items.Any())
         {
@@ -70,7 +70,7 @@ public class OrderRepository : IOrderRepository
             await _context.SaveChangesAsync();
         }
 
-        // Reload the order with its items and customer
+        
         await _context.Entry(order).Reference(o => o.Customer).LoadAsync();
         await _context.Entry(order).Collection(o => o.Items).LoadAsync();
 
@@ -94,16 +94,16 @@ public class OrderRepository : IOrderRepository
             throw new Exception("Order not found.");
         }
 
-        // Update order properties
+        
         order.OrderNo = orderDto.OrderNo;
         order.OrderDate = orderDto.OrderDate;
         order.ComCustomerId = orderDto.ComCustomerId;
         order.Address = orderDto.Address;
 
-        // Handle Items
+        
         if (orderDto.Items != null)
         {
-            // Remove items not present in the DTO
+            
             foreach (var existingItem in order.Items.ToList())
             {
                 if (!orderDto.Items.Any(i => i.SoItemId == existingItem.SoItemId))
@@ -112,12 +112,12 @@ public class OrderRepository : IOrderRepository
                 }
             }
 
-            // Update or add items
+            
             foreach (var itemDto in orderDto.Items)
             {
                 if (itemDto.SoItemId > 0)
                 {
-                    // Update existing item
+                    
                     var existingItem = order.Items.FirstOrDefault(i => i.SoItemId == itemDto.SoItemId);
                     if (existingItem != null)
                     {
@@ -128,7 +128,7 @@ public class OrderRepository : IOrderRepository
                 }
                 else
                 {
-                    // Add new item
+                    
                     var newItem = _mapper.Map<SoItem>(itemDto);
                     newItem.SoOrderId = order.SoOrderId;
                     _context.SoItems.Add(newItem);
@@ -138,7 +138,7 @@ public class OrderRepository : IOrderRepository
 
         await _context.SaveChangesAsync();
 
-        // Reload the order with its items and customer
+        
         await _context.Entry(order).Reference(o => o.Customer).LoadAsync();
         await _context.Entry(order).Collection(o => o.Items).LoadAsync();
 

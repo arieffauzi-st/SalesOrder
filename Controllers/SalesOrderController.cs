@@ -4,16 +4,12 @@ using SalesOrder.DTOs;
 using System.Text.Json;
 using SalesOrder.Models;
 
+
 namespace SalesOrder.Controllers
 {
-    public class SalesOrderController : Controller
+    public class SalesOrderController(IOrderRepository orderRepository) : Controller
     {
-        private readonly IOrderRepository _orderRepository;
-
-        public SalesOrderController(IOrderRepository orderRepository)
-        {
-            _orderRepository = orderRepository;
-        }
+        private readonly IOrderRepository _orderRepository = orderRepository;
 
         public async Task<IActionResult> Index(string keyword, DateTime? orderDate, int pageNumber = 1)
         {
@@ -108,5 +104,6 @@ namespace SalesOrder.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+
     }
 }
