@@ -8,9 +8,10 @@ namespace SalesOrder.Interfaces;
 public interface IOrderRepository
 {
     Task<List<OrderDto>> GetOrdersAsync(string keyword, DateTime? orderDate);
+    IQueryable<OrderDto> GetOrdersQueryable(string keyword, DateTime? orderDate);
     Task<OrderDto> GetOrderByIdAsync(int id);
     Task<List<CustomerDto>> GetCustomersAsync();
     Task<OrderDto> CreateOrderAsync(OrderDto orderDto);
     Task<OrderDto> UpdateOrderAsync(OrderDto orderDto); // Tambahkan ini
-    //Task DeleteOrderAsync(int id);
+    Task DeleteOrderAsync(long id);
 }

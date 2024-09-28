@@ -1,4 +1,5 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using SalesOrder.DTOs;
 using SalesOrder.Entities;
@@ -56,7 +57,7 @@ public class OrderRepository : IOrderRepository
         }
 
         _context.SoOrders.Add(order);
-        await _context.SaveChangesAsync(); // This will generate SoOrderId
+        await _context.SaveChangesAsync(); // Generates SoOrderId
 
         if (orderDto.Items != null && orderDto.Items.Any())
         {
@@ -90,38 +91,48 @@ public class OrderRepository : IOrderRepository
 
         if (order == null)
         {
-            return null;
+            throw new Exception("Order not found.");
         }
 
-        _context.Entry(order).CurrentValues.SetValues(orderDto);
+        // Update order properties
+        order.OrderNo = orderDto.OrderNo;
+        order.OrderDate = orderDto.OrderDate;
+        order.ComCustomerId = orderDto.ComCustomerId;
+        order.Address = orderDto.Address;
 
-        if (orderDto.ComCustomerId != 0)
+        // Handle Items
+        if (orderDto.Items != null)
         {
-            order.Customer = await _context.ComCustomers.FindAsync(orderDto.ComCustomerId);
-        }
-
-        // Remove existing items
-        foreach (var existingItem in order.Items.ToList())
-        {
-            if (!orderDto.Items.Any(i => i.SoItemId == existingItem.SoItemId))
+            // Remove items not present in the DTO
+            foreach (var existingItem in order.Items.ToList())
             {
-                _context.SoItems.Remove(existingItem);
+                if (!orderDto.Items.Any(i => i.SoItemId == existingItem.SoItemId))
+                {
+                    _context.SoItems.Remove(existingItem);
+                }
             }
-        }
 
-        // Update or add items
-        foreach (var itemDto in orderDto.Items)
-        {
-            var existingItem = order.Items.FirstOrDefault(i => i.SoItemId == itemDto.SoItemId);
-            if (existingItem != null)
+            // Update or add items
+            foreach (var itemDto in orderDto.Items)
             {
-                _context.Entry(existingItem).CurrentValues.SetValues(itemDto);
-            }
-            else
-            {
-                var newItem = _mapper.Map<SoItem>(itemDto);
-                newItem.SoOrderId = order.SoOrderId;
-                order.Items.Add(newItem);
+                if (itemDto.SoItemId > 0)
+                {
+                    // Update existing item
+                    var existingItem = order.Items.FirstOrDefault(i => i.SoItemId == itemDto.SoItemId);
+                    if (existingItem != null)
+                    {
+                        existingItem.ItemName = itemDto.ItemName;
+                        existingItem.Quantity = itemDto.Quantity;
+                        existingItem.Price = itemDto.Price;
+                    }
+                }
+                else
+                {
+                    // Add new item
+                    var newItem = _mapper.Map<SoItem>(itemDto);
+                    newItem.SoOrderId = order.SoOrderId;
+                    _context.SoItems.Add(newItem);
+                }
             }
         }
 
@@ -132,5 +143,38 @@ public class OrderRepository : IOrderRepository
         await _context.Entry(order).Collection(o => o.Items).LoadAsync();
 
         return _mapper.Map<OrderDto>(order);
+    }
+
+    public IQueryable<OrderDto> GetOrdersQueryable(string keyword, DateTime? orderDate)
+    {
+        var query = _context.SoOrders
+            .Include(o => o.Customer)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(keyword))
+        {
+            query = query.Where(o => o.OrderNo.Contains(keyword) || o.Customer.CustomerName.Contains(keyword));
+        }
+
+        if (orderDate.HasValue)
+        {
+            query = query.Where(o => o.OrderDate.Date == orderDate.Value.Date);
+        }
+
+        return query.ProjectTo<OrderDto>(_mapper.ConfigurationProvider);
+    }
+
+    public async Task DeleteOrderAsync(long id)
+    {
+        var order = await _context.SoOrders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.SoOrderId == id);
+
+        if (order != null)
+        {
+            _context.SoItems.RemoveRange(order.Items);
+            _context.SoOrders.Remove(order);
+            await _context.SaveChangesAsync();
+        }
     }
 }

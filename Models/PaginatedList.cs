@@ -10,11 +10,17 @@ namespace SalesOrder.Models
     {
         public int PageIndex { get; private set; }
         public int TotalPages { get; private set; }
+        public int PageSize { get; private set; }
+        public int FirstItemOnPage => (PageIndex - 1) * PageSize + 1;
+        public int LastItemOnPage => Math.Min(PageIndex * PageSize, TotalItems);
+        public int TotalItems { get; private set; }
 
         public PaginatedList(List<T> items, int count, int pageIndex, int pageSize)
         {
             PageIndex = pageIndex;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            PageSize = pageSize;
+            TotalItems = count;
 
             this.AddRange(items);
         }

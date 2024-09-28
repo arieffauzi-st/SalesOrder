@@ -61,6 +61,7 @@
                         </thead>
                         <tbody></tbody>
                     </table>
+                    <div id="itemPagination"></div>
                     <div class="row">
                         <div class="col-md-6">
                             <p>Total Item: <span id="totalItem">0</span></p>
@@ -80,33 +81,57 @@
     </div>
 </div>
 
+<h2>Existing Orders</h2>
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         $(document).ready(function() {
-            var items = @Html.Raw(Json.Serialize(Model.Items));
-            console.log("Loaded items:", items);
+            var items = @Html.Raw(Json.Serialize(Model.Items)) || [];
+            var itemsPerPage = 5;
+            var currentPage = 1;
 
             function renderItems() {
                 var tbody = $('#itemTable tbody');
                 tbody.empty();
-                items.forEach(function(item, index) {
-                    tbody.append(`
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-primary edit-item" data-index="${index}">Edit</button>
-                                <button type="button" class="btn btn-sm btn-danger delete-item" data-index="${index}">Delete</button>
-                            </td>
-                            <td>${item.itemName}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.price.toFixed(2)}</td>
-                            <td>${(item.quantity * item.price).toFixed(2)}</td>
-                        </tr>
-                    `);
-                });
-                updateTotals();
+                var startIndex = (currentPage - 1) * itemsPerPage;
+                var endIndex = startIndex + itemsPerPage;
+                var pageItems = items.slice(startIndex, endIndex);
+
+                pageItems.forEach(function(item, index) {
+                  tbody.append(`
+                      <tr>
+                          <td>${startIndex + index + 1}</td>
+                          <td>
+                              <button type="button" class="btn btn-sm btn-primary edit-item" data-index="${startIndex + index}">Edit</button>
+                              <button type="button" class="btn btn-sm btn-danger delete-item" data-index="${startIndex + index}">Delete</button>
+                          </td>
+                          <td>${item.itemName}</td>
+                          <td>${item.quantity}</td>
+                          <td>${item.price.toFixed(2)}</td>
+                          <td>${(item.quantity * item.price).toFixed(2)}</td>
+                      </tr>
+                  `);
+              });
+              updateTotals();
+              renderPagination();
             }
+
+            function renderPagination() {
+                var totalPages = Math.ceil(items.length / itemsPerPage);
+                var paginationHtml = '<nav><ul class="pagination">';
+                for (var i = 1; i <= totalPages; i++) {
+                    paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+                }
+                paginationHtml += '</ul></nav>';
+                $('#itemPagination').html(paginationHtml);
+            }
+
+            $(document).on('click', '#itemPagination .page-link', function(e) {
+                e.preventDefault();
+                currentPage = parseInt($(this).data('page'));
+                renderItems();
+            });
 
             function updateTotals() {
                 var totalItem = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -117,6 +142,7 @@
 
             $('#addItemBtn').click(function() {
                 items.push({ itemName: '', quantity: 0, price: 0 });
+                currentPage = Math.ceil(items.length / itemsPerPage);
                 renderItems();
                 editItem(items.length - 1);
             });
@@ -134,23 +160,23 @@
 
             function editItem(index) {
                 var item = items[index];
-                var row = $('#itemTable tbody tr').eq(index);
+                var row = $(`#itemTable tbody tr:eq(${index % itemsPerPage})`);
                 row.html(`
-                    <td>${index + 1}</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-success save-item" data-index="${index}">Save</button>
-                        <button type="button" class="btn btn-sm btn-secondary cancel-edit" data-index="${index}">Cancel</button>
-                    </td>
-                    <td><input type="text" class="form-control" value="${item.itemName}"></td>
-                    <td><input type="number" class="form-control" value="${item.quantity}"></td>
-                    <td><input type="number" class="form-control" value="${item.price}"></td>
-                    <td>${(item.quantity * item.price).toFixed(2)}</td>
-                `);
+                  <td>${index + 1}</td>
+                  <td>
+                      <button type="button" class="btn btn-sm btn-success save-item" data-index="${index}">Save</button>
+                      <button type="button" class="btn btn-sm btn-secondary cancel-edit" data-index="${index}">Cancel</button>
+                  </td>
+                  <td><input type="text" class="form-control" value="${item.itemName}"></td>
+                  <td><input type="number" class="form-control" value="${item.quantity}"></td>
+                  <td><input type="number" class="form-control" value="${item.price}"></td>
+                  <td>${(item.quantity * item.price).toFixed(2)}</td>
+              `);
             }
 
             $(document).on('click', '.save-item', function() {
                 var index = $(this).data('index');
-                var row = $('#itemTable tbody tr').eq(index);
+                var row = $(`#itemTable tbody tr:eq(${index % itemsPerPage})`);
                 items[index] = {
                     itemName: row.find('td:eq(2) input').val(),
                     quantity: parseInt(row.find('td:eq(3) input').val()),
@@ -166,8 +192,6 @@
             $('form').submit(function(e) {
                 e.preventDefault();
                 var formData = new FormData(this);
-                
-                // Add items to formData
                 formData.append('Items', JSON.stringify(items));
 
                 $.ajax({
